@@ -116,10 +116,16 @@ function errorResponse({ routeName, h, err }) {
   if (process.env.NODE_ENV !== "production") {
     const stack = cleanStack(err.stack);
     console.error(`Route ${routeName} failed:`, stack);
+    if (h.response) {
+      return h
+          .response(`<html><body><h1>DEV ERROR</h1><pre>${stack}</pre></body></html>`)
+          .type("text/html; charset=UTF-8")
+          .code(HttpStatusCodes.INTERNAL_SERVER_ERROR);
+    }
     return h
-      .response(`<html><body><h1>DEV ERROR</h1><pre>${stack}</pre></body></html>`)
-      .type("text/html; charset=UTF-8")
-      .code(HttpStatusCodes.INTERNAL_SERVER_ERROR);
+        .code(HttpStatusCodes.INTERNAL_SERVER_ERROR)
+        .type("text/html; charset=UTF-8")
+        .send(`<html><body><h1>DEV ERROR</h1><pre>${stack}</pre></body></html>`);
   } else {
     return Boom.internal();
   }
